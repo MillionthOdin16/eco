@@ -6,7 +6,7 @@ dependencies {
     compileOnly project(":eco-core:core-backend")
 
     // Libraries
-    implementation 'com.github.Redempt:Crunch:1.1.2'
+    implementation 'com.github.Redempt:Crunch:master-SNAPSHOT'
     implementation 'mysql:mysql-connector-java:8.0.25'
     implementation 'org.jetbrains.exposed:exposed-core:0.37.3'
     implementation 'org.jetbrains.exposed:exposed-dao:0.37.3'
@@ -25,7 +25,6 @@ dependencies {
     compileOnly 'com.comphenix.protocol:ProtocolLib:5.0.0-SNAPSHOT'
     compileOnly 'com.sk89q.worldguard:worldguard-bukkit:7.0.7-SNAPSHOT'
     compileOnly 'com.github.TechFortress:GriefPrevention:16.17.1'
-    compileOnly 'com.massivecraft:Factions:1.6.9.5-U0.5.10'
     compileOnly 'com.github.cryptomorin:kingdoms:1.12.3'
     compileOnly('com.github.TownyAdvanced:Towny:0.97.2.6') {
         exclude group: 'com.zaxxer', module: 'HikariCP'
@@ -47,6 +46,7 @@ dependencies {
     compileOnly 'com.wolfyscript.wolfyutilities:wolfyutilities:3.16.0.0'
     compileOnly 'com.github.decentsoftware-eu:decentholograms:2.1.2'
     compileOnly 'com.github.Gypopo:EconomyShopGUI-API:1.1.0'
+    compileOnly 'com.github.N0RSKA:ScytherAPI:55a'
 
     // MythicMobs
     compileOnly 'io.lumine:Mythic:5.0.1'

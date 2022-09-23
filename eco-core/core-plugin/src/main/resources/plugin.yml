@@ -37,6 +37,7 @@ softdepend:
   - DeluxeCombat
   - IridiumSkyblock
   - SuperiorSkyblock2
+  - FabledSkyBlock
   - CrashClaim
   - DecentHolograms
   - MythicMobs
@@ -46,3 +47,4 @@ softdepend:
   - EconomyShopGUI
   - zShop
   - DeluxeSellwands
+  - Scyther
