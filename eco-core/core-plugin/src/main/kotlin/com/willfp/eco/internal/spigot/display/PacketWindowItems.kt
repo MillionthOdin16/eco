@@ -14,31 +14,34 @@ import org.bukkit.inventory.ItemStack
 import java.util.concurrent.ConcurrentHashMap
 
 class PacketWindowItems(plugin: EcoPlugin) : AbstractPacketAdapter(plugin, PacketType.Play.Server.WINDOW_ITEMS, false) {
-    private val ignorePacketList = ConcurrentHashMap.newKeySet<String>()
+    private val lastKnownWindowIDs = ConcurrentHashMap<String, Int>()
 
     override fun onSend(
         packet: PacketContainer,
         player: Player,
         event: PacketEvent
     ) {
-        if (ignorePacketList.contains(player.name)) {
-            ignorePacketList.remove(player.name)
-            return
+        packet.itemModifier.modify(0) {
+            Display.display(
+                it, player
+            )
         }
 
         val windowId = packet.integers.read(0)
 
-        /*When things are working well, windowId is non-zero
-        * but occasionally this onsend method is called
-        * more than once with the additional calls having
-        * a windowId of 0. Those additional calls didn't
-        * allow the DisplayFrame to be set to empty and
-        * caused the display to break for tiers and enchants
-        * -Bradarr */
+        // Using name because UUID is unreliable with ProtocolLib players.
+        val name = player.name
 
-        //if (windowId != 0) {
+        val lastKnownID = lastKnownWindowIDs[name]
+        lastKnownWindowIDs[name] = windowId
+
+        // If there is any change in window ID at any point,
+        // Remove the last display frame to prevent any potential conflicts.
+        // If the window ID is not zero (not a player inventory), then remove too,
+        // as GUIs are not player inventories.
+        if (lastKnownID != windowId || windowId != 0) {
             player.lastDisplayFrame = DisplayFrame.EMPTY
-        //}
+        }
 
         val itemStacks = packet.itemListModifier.read(0) ?: return
 
