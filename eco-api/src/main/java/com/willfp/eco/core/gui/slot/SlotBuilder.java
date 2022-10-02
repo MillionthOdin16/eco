@@ -4,6 +4,7 @@ import com.willfp.eco.core.gui.slot.functional.SlotHandler;
 import com.willfp.eco.core.gui.slot.functional.SlotModifier;
 import com.willfp.eco.core.gui.slot.functional.SlotUpdater;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,6 +15,28 @@ import java.util.function.Predicate;
  * Builder to create slots.
  */
 public interface SlotBuilder {
+    /**
+     * Set click handler.
+     *
+     * @param type    The click type.
+     * @param handler The handler.
+     * @return The builder.
+     */
+    SlotBuilder onClick(@NotNull ClickType type,
+                        @NotNull SlotHandler handler);
+
+    /**
+     * Set click handler.
+     *
+     * @param type   The click type.
+     * @param action The handler.
+     * @return The builder.
+     */
+    default SlotBuilder onClick(@NotNull final ClickType type,
+                                @NotNull final BiConsumer<InventoryClickEvent, Slot> action) {
+        return onClick(type, (event, slot, menu) -> action.accept(event, slot));
+    }
+
     /**
      * Set click handler.
      *
@@ -30,7 +53,9 @@ public interface SlotBuilder {
      * @param handler The handler.
      * @return The builder.
      */
-    SlotBuilder onLeftClick(@NotNull SlotHandler handler);
+    default SlotBuilder onLeftClick(@NotNull final SlotHandler handler) {
+        return onClick(ClickType.LEFT, handler);
+    }
 
     /**
      * Set click handler.
@@ -48,7 +73,9 @@ public interface SlotBuilder {
      * @param handler The handler.
      * @return The builder.
      */
-    SlotBuilder onRightClick(@NotNull SlotHandler handler);
+    default SlotBuilder onRightClick(@NotNull final SlotHandler handler) {
+        return onClick(ClickType.RIGHT, handler);
+    }
 
     /**
      * Set click handler.
@@ -66,7 +93,9 @@ public interface SlotBuilder {
      * @param handler The handler.
      * @return The builder.
      */
-    SlotBuilder onShiftLeftClick(@NotNull SlotHandler handler);
+    default SlotBuilder onShiftLeftClick(@NotNull final SlotHandler handler) {
+        return onClick(ClickType.SHIFT_LEFT, handler);
+    }
 
     /**
      * Set click handler.
@@ -84,7 +113,9 @@ public interface SlotBuilder {
      * @param handler The handler.
      * @return The builder.
      */
-    SlotBuilder onShiftRightClick(@NotNull SlotHandler handler);
+    default SlotBuilder onShiftRightClick(@NotNull final SlotHandler handler) {
+        return onClick(ClickType.SHIFT_RIGHT, handler);
+    }
 
     /**
      * Set click handler.
@@ -102,7 +133,9 @@ public interface SlotBuilder {
      * @param handler The handler.
      * @return The builder.
      */
-    SlotBuilder onMiddleClick(@NotNull SlotHandler handler);
+    default SlotBuilder onMiddleClick(@NotNull final SlotHandler handler) {
+        return onClick(ClickType.MIDDLE, handler);
+    }
 
     /**
      * Prevent captive for players that match a predicate.
@@ -111,21 +144,6 @@ public interface SlotBuilder {
      * @return The builder.
      */
     SlotBuilder notCaptiveFor(@NotNull Predicate<Player> predicate);
-
-    /**
-     * Modify the ItemStack.
-     *
-     * @param modifier The modifier.
-     * @return The builder.
-     * @deprecated Use {@link SlotBuilder#setUpdater(SlotUpdater)} instead.
-     */
-    @Deprecated
-    default SlotBuilder setModifier(@NotNull SlotModifier modifier) {
-        return setUpdater((player, menu, previous) -> {
-            modifier.modify(player, menu, previous);
-            return previous;
-        });
-    }
 
     /**
      * Set the ItemStack updater.
@@ -158,4 +176,19 @@ public interface SlotBuilder {
      * @return The slot.
      */
     Slot build();
+
+    /**
+     * Modify the ItemStack.
+     *
+     * @param modifier The modifier.
+     * @return The builder.
+     * @deprecated Use {@link SlotBuilder#setUpdater(SlotUpdater)} instead.
+     */
+    @Deprecated
+    default SlotBuilder setModifier(@NotNull SlotModifier modifier) {
+        return setUpdater((player, menu, previous) -> {
+            modifier.modify(player, menu, previous);
+            return previous;
+        });
+    }
 }

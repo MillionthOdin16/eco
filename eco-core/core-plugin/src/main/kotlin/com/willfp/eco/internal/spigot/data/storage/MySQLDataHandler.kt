@@ -82,6 +82,7 @@ class MySQLDataHandler(
             PersistentDataKeyType.STRING -> data.getStringOrNull(key.key.toString())
             PersistentDataKeyType.BOOLEAN -> data.getBoolOrNull(key.key.toString())
             PersistentDataKeyType.STRING_LIST -> data.getStringsOrNull(key.key.toString())
+            PersistentDataKeyType.CONFIG -> data.getSubsectionOrNull(key.key.toString())
             else -> null
         }
 
@@ -117,7 +118,10 @@ class MySQLDataHandler(
                     row
                 } else {
                     transaction {
-                        table.insert { it[id] = uuid }
+                        table.insert {
+                            it[id] = uuid
+                            it[dataColumn] = "{}"
+                        }
                     }
                     table.select { table.id eq uuid }.limit(1).singleOrNull()
                 }

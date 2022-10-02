@@ -16,6 +16,9 @@ dependencies {
     implementation 'org.javassist:javassist:3.28.0-GA'
     implementation 'org.mongodb:mongodb-driver-sync:4.6.0'
     implementation 'org.litote.kmongo:kmongo-coroutine:4.6.0'
+    implementation('com.moandjiezana.toml:toml4j:0.7.2') {
+        exclude group: 'com.google.code.gson', module: 'gson'
+    }
 
     // Included in spigot jar
     compileOnly 'com.google.code.gson:gson:2.8.8'
@@ -46,6 +49,7 @@ dependencies {
     compileOnly 'com.github.decentsoftware-eu:decentholograms:2.1.2'
     compileOnly 'com.github.Gypopo:EconomyShopGUI-API:1.1.0'
     compileOnly 'com.github.N0RSKA:ScytherAPI:55a'
+    compileOnly 'com.ticxo.modelengine:api:R3.0.1'
 
     // MythicMobs
     compileOnly 'io.lumine:Mythic:5.0.1'

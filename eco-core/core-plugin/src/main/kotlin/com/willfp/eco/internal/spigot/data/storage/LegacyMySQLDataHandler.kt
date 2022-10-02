@@ -48,7 +48,7 @@ the worst bodge I've shipped in production.
 
 @Suppress("UNCHECKED_CAST")
 class LegacyMySQLDataHandler(
-    private val plugin: EcoSpigotPlugin,
+    plugin: EcoSpigotPlugin,
     handler: EcoProfileHandler
 ) : DataHandler(HandlerType.LEGACY_MYSQL) {
     private val playerHandler: ImplementedMySQLHandler
@@ -197,7 +197,7 @@ private class ImplementedMySQLHandler(
 
         doRead.call()
 
-        return if (Eco.getHandler().ecoPlugin.configYml.getBool("mysql.async-reads")) {
+        return if (Eco.get().ecoPlugin.configYml.getBool("mysql.async-reads")) {
             executor.submit(doRead).get()
         } else {
             doRead.call()
@@ -216,25 +216,30 @@ private class ImplementedMySQLHandler(
                         when (key.type) {
                             PersistentDataKeyType.INT -> registerColumn<Int>(key.key.toString(), IntegerColumnType())
                                 .default(key.defaultValue as Int)
+
                             PersistentDataKeyType.DOUBLE -> registerColumn<Double>(
                                 key.key.toString(),
                                 DoubleColumnType()
-                            )
-                                .default(key.defaultValue as Double)
+                            ).default(key.defaultValue as Double)
+
                             PersistentDataKeyType.BOOLEAN -> registerColumn<Boolean>(
                                 key.key.toString(),
                                 BooleanColumnType()
-                            )
-                                .default(key.defaultValue as Boolean)
+                            ).default(key.defaultValue as Boolean)
+
                             PersistentDataKeyType.STRING -> registerColumn<String>(
                                 key.key.toString(),
                                 VarCharColumnType(512)
-                            )
-                                .default(key.defaultValue as String)
+                            ).default(key.defaultValue as String)
+
                             PersistentDataKeyType.STRING_LIST -> registerColumn<String>(
                                 key.key.toString(),
                                 VarCharColumnType(8192)
                             ).default(PersistentDataKeyType.STRING_LIST.constrainSQLTypes(key.defaultValue as List<String>) as String)
+
+                            PersistentDataKeyType.CONFIG -> throw IllegalArgumentException(
+                                "Config Persistent Data Keys are not supported by the legacy MySQL handler!"
+                            )
 
                             else -> throw NullPointerException("Null value found!")
                         }

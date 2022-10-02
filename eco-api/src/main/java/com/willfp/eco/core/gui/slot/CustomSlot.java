@@ -1,5 +1,6 @@
 package com.willfp.eco.core.gui.slot;
 
+import com.willfp.eco.core.gui.menu.Menu;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -26,22 +27,7 @@ public abstract class CustomSlot implements Slot {
      * @param slot The slot to delegate to.
      */
     protected void init(@NotNull final Slot slot) {
-        if (delegate == null) {
-            throw new IllegalStateException("Custom Slot was not initialized!");
-        }
-
         this.delegate = slot;
-    }
-
-    /**
-     * Get the delegate slot.
-     * <p>
-     * This is not required to add the slot to a menu, but is instead used internally.
-     *
-     * @return The slot.
-     */
-    public Slot getDelegate() {
-        return this.delegate;
     }
 
     @Override
@@ -54,21 +40,13 @@ public abstract class CustomSlot implements Slot {
     }
 
     @Override
-    public boolean isCaptive() {
+    public boolean isCaptive(@NotNull final Player player,
+                             @NotNull final Menu menu) {
         if (delegate == null) {
             throw new IllegalStateException("Custom Slot was not initialized!");
         }
 
-        return delegate.isCaptive();
-    }
-
-    @Override
-    public boolean isNotCaptiveFor(@NotNull final Player player) {
-        if (delegate == null) {
-            throw new IllegalStateException("Custom Slot was not initialized!");
-        }
-
-        return delegate.isNotCaptiveFor(player);
+        return delegate.isCaptive(player, menu);
     }
 
     @Override
@@ -78,6 +56,12 @@ public abstract class CustomSlot implements Slot {
         }
 
         return delegate.isCaptiveFromEmpty();
+    }
+
+    @Override
+    public final Slot getActionableSlot(@NotNull final Player player,
+                                        @NotNull final Menu menu) {
+        return delegate;
     }
 
     @Override
@@ -93,5 +77,18 @@ public abstract class CustomSlot implements Slot {
     @Override
     public final Slot getSlotAt(int row, int column) {
         return Slot.super.getSlotAt(row, column);
+    }
+
+    /**
+     * Get the delegate slot.
+     * <p>
+     * This is not required to add the slot to a menu, but is instead used internally.
+     *
+     * @return The slot.
+     * @deprecated Replaced with {@link Slot#getActionableSlot(Player, Menu)}
+     */
+    @Deprecated(since = "6.43.0", forRemoval = true)
+    public Slot getDelegate() {
+        return this.delegate;
     }
 }

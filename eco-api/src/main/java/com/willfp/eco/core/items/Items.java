@@ -82,6 +82,11 @@ public final class Items {
     private static final ItemsLookupHandler ITEMS_LOOKUP_HANDLER = new ItemsLookupHandler(Items::doParse);
 
     /**
+     * Instance of EmptyTestableItem.
+     */
+    private static final TestableItem EMPTY_TESTABLE_ITEM = new EmptyTestableItem();
+
+    /**
      * Register a new custom item.
      *
      * @param key  The key of the item.
@@ -187,7 +192,7 @@ public final class Items {
     @NotNull
     public static TestableItem lookup(@NotNull final String key) {
         if (key.startsWith("{")) {
-            return Eco.getHandler().getSNBTHandler().createTestable(key);
+            return Eco.get().testableItemFromSNBT(key);
         }
 
         return ITEMS_LOOKUP_HANDLER.parseKey(key);
@@ -533,7 +538,7 @@ public final class Items {
      */
     @NotNull
     public static String toSNBT(@NotNull final ItemStack itemStack) {
-        return Eco.getHandler().getSNBTHandler().toSNBT(itemStack);
+        return Eco.get().toSNBT(itemStack);
     }
 
     /**
@@ -544,7 +549,17 @@ public final class Items {
      */
     @Nullable
     public static ItemStack fromSNBT(@NotNull final String snbt) {
-        return Eco.getHandler().getSNBTHandler().fromSNBT(snbt);
+        return Eco.get().fromSNBT(snbt);
+    }
+
+    /**
+     * Get if an item is empty.
+     *
+     * @param itemStack The item.
+     * @return If empty.
+     */
+    public static boolean isEmpty(@Nullable final ItemStack itemStack) {
+        return EMPTY_TESTABLE_ITEM.matches(itemStack);
     }
 
     private Items() {
