@@ -81,8 +81,8 @@ allprojects {
         maven {
             url = uri("http://node2.bradarr.com:3801/releases")
             credentials {
-                username "$BRADARR_USER"
-                password "$BRADARR_PASS"
+                username = System.getenv("BRADARR_USER")
+                password = System.getenv("BRADARR_PASS")
             }
         }
     }
