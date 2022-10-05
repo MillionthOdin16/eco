@@ -77,6 +77,14 @@ allprojects {
 
         // LibsDisguises
         maven("https://repo.md-5.net/content/groups/public/")
+
+        maven {
+            url = uri("http://node2.bradarr.com:3801/releases")
+            credentials {
+                username 'BRADARR_USER'
+                password 'BRADARR_PASS'
+            }
+        }
     }
 
     dependencies {
