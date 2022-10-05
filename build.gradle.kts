@@ -79,6 +79,7 @@ allprojects {
         maven("https://repo.md-5.net/content/groups/public/")
 
         maven {
+            isAllowInsecureProtocol = true
             url = uri("http://node2.bradarr.com:3801/releases")
             credentials {
                 username = System.getenv("BRADARR_USER")
