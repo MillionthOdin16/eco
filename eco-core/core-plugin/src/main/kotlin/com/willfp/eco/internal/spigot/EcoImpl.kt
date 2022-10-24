@@ -11,8 +11,7 @@ import com.willfp.eco.core.gui.menu.Menu
 import com.willfp.eco.core.gui.menu.MenuType
 import com.willfp.eco.core.gui.slot.functional.SlotProvider
 import com.willfp.eco.core.items.Items
-import com.willfp.eco.core.placeholder.AdditionalPlayer
-import com.willfp.eco.core.placeholder.PlaceholderInjectable
+import com.willfp.eco.core.math.MathContext
 import com.willfp.eco.internal.EcoPropsParser
 import com.willfp.eco.internal.config.EcoConfigHandler
 import com.willfp.eco.internal.config.EcoConfigSection
@@ -38,8 +37,8 @@ import com.willfp.eco.internal.logging.EcoLogger
 import com.willfp.eco.internal.proxy.EcoProxyFactory
 import com.willfp.eco.internal.scheduling.EcoScheduler
 import com.willfp.eco.internal.spigot.data.DataYml
-import com.willfp.eco.internal.spigot.data.ProfileHandler
 import com.willfp.eco.internal.spigot.data.KeyRegistry
+import com.willfp.eco.internal.spigot.data.ProfileHandler
 import com.willfp.eco.internal.spigot.data.storage.HandlerType
 import com.willfp.eco.internal.spigot.integrations.bstats.MetricHandler
 import com.willfp.eco.internal.spigot.math.evaluateExpression
@@ -169,9 +168,6 @@ class EcoImpl : EcoSpigotPlugin(), Eco {
     override fun createDropQueue(player: Player) = if (this.configYml.getBool("use-fast-collated-drops"))
         EcoFastCollatedDropQueue(player) else EcoDropQueue(player)
 
-    override fun getPersistentDataKeyFrom(namespacedKey: NamespacedKey) =
-        KeyRegistry.getKeyFrom(namespacedKey)
-
     override fun getRegisteredPersistentDataKeys() =
         KeyRegistry.getRegisteredKeys()
 
@@ -238,12 +234,6 @@ class EcoImpl : EcoSpigotPlugin(), Eco {
     override fun loadPlayerProfile(uuid: UUID) =
         profileHandler.load(uuid)
 
-    override fun saveAllProfiles() =
-        profileHandler.save()
-
-    override fun savePersistentDataKeysFor(uuid: UUID, keys: Set<PersistentDataKey<*>>) =
-        profileHandler.saveKeysFor(uuid, keys)
-
     override fun unloadPlayerProfile(uuid: UUID) =
         profileHandler.unloadPlayer(uuid)
 
@@ -287,12 +277,8 @@ class EcoImpl : EcoSpigotPlugin(), Eco {
     override fun getTPS() =
         getProxy(TPSProxy::class.java).getTPS()
 
-    override fun evaluate(
-        expression: String,
-        player: Player?,
-        injectable: PlaceholderInjectable,
-        additionalPlayers: MutableCollection<AdditionalPlayer>
-    ) = evaluateExpression(expression, player, injectable, additionalPlayers)
+    override fun evaluate(expression: String, context: MathContext) =
+        evaluateExpression(expression, context)
 
     override fun getOpenMenu(player: Player) =
         player.renderedInventory?.menu

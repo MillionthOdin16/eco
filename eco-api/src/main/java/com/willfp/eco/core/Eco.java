@@ -22,8 +22,7 @@ import com.willfp.eco.core.gui.menu.MenuType;
 import com.willfp.eco.core.gui.slot.SlotBuilder;
 import com.willfp.eco.core.gui.slot.functional.SlotProvider;
 import com.willfp.eco.core.items.TestableItem;
-import com.willfp.eco.core.placeholder.AdditionalPlayer;
-import com.willfp.eco.core.placeholder.PlaceholderInjectable;
+import com.willfp.eco.core.math.MathContext;
 import com.willfp.eco.core.proxy.ProxyFactory;
 import com.willfp.eco.core.scheduling.Scheduler;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -41,7 +40,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -336,15 +334,6 @@ public interface Eco {
     Set<PersistentDataKey<?>> getRegisteredPersistentDataKeys();
 
     /**
-     * Get persistent data key from namespaced key.
-     *
-     * @param namespacedKey The key.
-     * @return The key, or null if not found.
-     */
-    @Nullable
-    PersistentDataKey<?> getPersistentDataKeyFrom(@NotNull NamespacedKey namespacedKey);
-
-    /**
      * Load a player profile.
      *
      * @param uuid The UUID.
@@ -367,24 +356,6 @@ public interface Eco {
      * @param uuid The uuid.
      */
     void unloadPlayerProfile(@NotNull UUID uuid);
-
-    /**
-     * Save keys for a player.
-     * <p>
-     * Can run async if using MySQL.
-     *
-     * @param uuid The uuid.
-     * @param keys The keys.
-     */
-    void savePersistentDataKeysFor(@NotNull UUID uuid,
-                                   @NotNull Set<PersistentDataKey<?>> keys);
-
-    /**
-     * Commit all changes to the file.
-     * <p>
-     * Does nothing if using MySQL.
-     */
-    void saveAllProfiles();
 
     /**
      * Create dummy entity - never spawned, exists purely in code.
@@ -511,16 +482,12 @@ public interface Eco {
     /**
      * Evaluate an expression.
      *
-     * @param expression        The expression.
-     * @param player            The player.
-     * @param injectable        The injectable placeholders.
-     * @param additionalPlayers The additional players.
+     * @param expression The expression.
+     * @param context    The context.
      * @return The value of the expression, or zero if invalid.
      */
     double evaluate(@NotNull String expression,
-                    @Nullable Player player,
-                    @NotNull PlaceholderInjectable injectable,
-                    @NotNull Collection<AdditionalPlayer> additionalPlayers);
+                    @NotNull MathContext context);
 
     /**
      * Get the menu a player currently has open.

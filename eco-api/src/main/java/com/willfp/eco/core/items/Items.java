@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -85,6 +86,11 @@ public final class Items {
      * Instance of EmptyTestableItem.
      */
     private static final TestableItem EMPTY_TESTABLE_ITEM = new EmptyTestableItem();
+
+    /**
+     * Friendly material names (without underscores, etc.)
+     */
+    private static final Map<String, Material> FRIENDLY_MATERIAL_NAMES = new HashMap<>();
 
     /**
      * Register a new custom item.
@@ -216,7 +222,7 @@ public final class Items {
             if (isWildcard) {
                 itemType = itemType.substring(1);
             }
-            Material material = Material.getMaterial(itemType.toUpperCase());
+            Material material = FRIENDLY_MATERIAL_NAMES.get(itemType.toLowerCase());
             if (material == null || material == Material.AIR) {
                 return new EmptyTestableItem();
             }
@@ -564,5 +570,26 @@ public final class Items {
 
     private Items() {
         throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
+
+    static {
+        for (Material material : Material.values()) {
+            FRIENDLY_MATERIAL_NAMES.put(material.name().toLowerCase(), material);
+
+            String oneWord = material.name().toLowerCase().replace("_", "");
+            if (!FRIENDLY_MATERIAL_NAMES.containsKey(oneWord)) {
+                FRIENDLY_MATERIAL_NAMES.put(oneWord, material);
+            }
+
+            String plural = material.name().toLowerCase() + "s";
+            if (!FRIENDLY_MATERIAL_NAMES.containsKey(plural)) {
+                FRIENDLY_MATERIAL_NAMES.put(plural, material);
+            }
+
+            String oneWordPlural = oneWord + "s";
+            if (!FRIENDLY_MATERIAL_NAMES.containsKey(oneWordPlural)) {
+                FRIENDLY_MATERIAL_NAMES.put(oneWordPlural, material);
+            }
+        }
     }
 }
