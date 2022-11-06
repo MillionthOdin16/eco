@@ -1,9 +1,15 @@
 package com.willfp.eco.core.price.impl;
 
 import com.willfp.eco.core.integrations.economy.EconomyManager;
+import com.willfp.eco.core.math.MathContext;
 import com.willfp.eco.core.price.Price;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
 
 /**
  * Economy-based price (for Vault, Treasury, etc.)
@@ -12,7 +18,17 @@ public final class PriceEconomy implements Price {
     /**
      * The value of the price.
      */
-    private double value;
+    private final Function<MathContext, Double> function;
+
+    /**
+     * The base math context.
+     */
+    private final MathContext baseContext;
+
+    /**
+     * The multipliers.
+     */
+    private final Map<UUID, Double> multipliers = new HashMap<>();
 
     /**
      * Create a new economy-based price.
@@ -20,26 +36,49 @@ public final class PriceEconomy implements Price {
      * @param value The value.
      */
     public PriceEconomy(final double value) {
-        this.value = value;
+        this(MathContext.EMPTY, ctx -> value);
+    }
+
+    /**
+     * Create a new economy-based price.
+     *
+     * @param baseContext The base context.
+     * @param function    The function.
+     */
+    public PriceEconomy(@NotNull final MathContext baseContext,
+                        @NotNull final Function<MathContext, Double> function) {
+        this.baseContext = baseContext;
+        this.function = function;
     }
 
     @Override
-    public boolean canAfford(@NotNull Player player) {
-        return EconomyManager.getBalance(player) >= value;
+    public boolean canAfford(@NotNull final Player player) {
+        return EconomyManager.getBalance(player) >= getValue(player);
     }
 
     @Override
-    public void pay(@NotNull Player player) {
-        EconomyManager.removeMoney(player, value);
+    public void pay(@NotNull final Player player) {
+        EconomyManager.removeMoney(player, getValue(player));
     }
 
     @Override
-    public double getValue() {
-        return value;
+    public void giveTo(@NotNull final Player player) {
+        EconomyManager.giveMoney(player, getValue(player));
     }
 
     @Override
-    public void setValue(final double value) {
-        this.value = value;
+    public double getValue(@NotNull final Player player) {
+        return this.function.apply(MathContext.copyWithPlayer(baseContext, player)) * getMultiplier(player);
+    }
+
+    @Override
+    public double getMultiplier(@NotNull final Player player) {
+        return this.multipliers.getOrDefault(player.getUniqueId(), 1.0);
+    }
+
+    @Override
+    public void setMultiplier(@NotNull final Player player,
+                              final double multiplier) {
+        this.multipliers.put(player.getUniqueId(), multiplier);
     }
 }

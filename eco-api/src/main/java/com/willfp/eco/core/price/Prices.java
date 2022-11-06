@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * Class to manage prices.
@@ -65,18 +66,18 @@ public final class Prices {
     public static Price create(@NotNull final String expression,
                                @Nullable final String priceName,
                                @NotNull final MathContext context) {
-        double value = NumberUtils.evaluateExpression(
+        Function<MathContext, Double> function = (ctx) -> NumberUtils.evaluateExpression(
                 expression,
-                context
+                ctx
         );
 
-        if (value <= 0) {
+        if (function.apply(context) <= 0) {
             return new PriceFree();
         }
 
         // Default to economy
         if (priceName == null) {
-            return new PriceEconomy(value);
+            return new PriceEconomy(context, function);
         }
 
         // Find price factory
@@ -90,9 +91,9 @@ public final class Prices {
                 return new PriceFree();
             }
 
-            return new PriceItem((int) Math.round(value), item);
+            return new PriceItem(context, function, item);
         } else {
-            return factory.create(value);
+            return factory.create(context, function);
         }
     }
 
