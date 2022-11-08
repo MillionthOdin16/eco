@@ -1,5 +1,6 @@
 package com.willfp.eco.internal.gui.menu
 
+import com.willfp.eco.core.gui.menu.events.CaptiveItemChangeEvent
 import com.willfp.eco.core.items.isEmpty
 import com.willfp.eco.core.recipe.parts.EmptyTestableItem
 import com.willfp.eco.util.MenuUtils
@@ -38,7 +39,7 @@ class RenderedInventory(
                 val position = GUIPosition(row, column)
                 val bukkit = MenuUtils.rowColumnToSlot(row, column, menu.columns)
 
-                val slot = menu.getSlot(row, column, player, menu)
+                val slot = menu.getSlot(row, column, player)
                 val renderedItem = slot.getItemStack(player)
 
                 if (slot.isCaptive(player, menu)) {
@@ -63,6 +64,20 @@ class RenderedInventory(
         captiveItems.clear()
         captiveItems.putAll(newCaptive)
 
+        // Call captive item change event
+        for (position in previousCaptive.keys union newCaptive.keys) {
+            if (previousCaptive[position] != newCaptive[position]) {
+                menu.callEvent(
+                    player, CaptiveItemChangeEvent(
+                        position.row,
+                        position.column,
+                        previousCaptive[position],
+                        newCaptive[position]
+                    )
+                )
+            }
+        }
+
         menu.runOnRender(player)
 
         // Run second render if captive items changed
@@ -71,7 +86,7 @@ class RenderedInventory(
                 for (column in (1..menu.columns)) {
                     val bukkit = MenuUtils.rowColumnToSlot(row, column, menu.columns)
 
-                    val slot = menu.getSlot(row, column, player, menu)
+                    val slot = menu.getSlot(row, column, player)
                     val renderedItem = slot.getItemStack(player)
 
                     if (!slot.isCaptive(player, menu)) {
@@ -89,7 +104,7 @@ class RenderedInventory(
             for (column in (1..menu.columns)) {
                 val bukkit = MenuUtils.rowColumnToSlot(row, column, menu.columns)
 
-                val slot = menu.getSlot(row, column, player, menu)
+                val slot = menu.getSlot(row, column, player)
 
                 if (slot.isCaptive(player, menu)) {
                     inventory.setItem(bukkit, slot.getItemStack(player))
