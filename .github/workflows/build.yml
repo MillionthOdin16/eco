@@ -1,0 +1,76 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  release:
+    types: [created]
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+
+      - name: Set version
+        id: set-version
+        run: |
+          chmod +x ./gradlew
+          VERSION=$(./gradlew properties | grep '^version:' | cut -d' ' -f2 | sed 's/[^0-9.]//g')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build and Test
+        run: |
+          ./gradlew build --info --stacktrace
+
+      - name: Prepare artifacts directory
+        run: |
+          mkdir -p artifacts
+          cp build/libs/*.jar artifacts/
+          # Rename each artifact with version
+          for file in artifacts/*.jar; do
+            mv "$file" "${file%.jar}-v${{ env.VERSION }}.jar"
+          done
+          echo "Prepared individual artifacts with version ${{ env.VERSION }}"
+
+      # Upload each JAR file as a separate artifact
+      - name: Upload individual artifacts
+        run: |
+          for file in artifacts/*.jar; do
+            artifact_name=$(basename "$file" .jar)
+            echo "Uploading $file as $artifact_name"
+            gh artifact upload --name "$artifact_name" --path "$file"
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Report artifact sizes
+        run: |
+          echo "Artifact sizes:"
+          du -sh artifacts/*
+        if: always()
